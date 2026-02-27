@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Login from "./Login";
 
+const API_URL = "https://mini-crm-backend-e6y8.onrender.com";
+
 function App() {
   const [stats, setStats] = useState(null);
   const [leads, setLeads] = useState([]);
@@ -16,7 +18,7 @@ function App() {
   }, [isLoggedIn]);
 
   const fetchStats = () => {
-    fetch("http://localhost:5000/api/leads/stats/overview", {
+    fetch(`${API_URL}/api/leads/stats/overview`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -27,7 +29,7 @@ function App() {
   };
 
   const fetchLeads = () => {
-    fetch("http://localhost:5000/api/leads", {
+    fetch(`${API_URL}/api/leads`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -38,7 +40,7 @@ function App() {
   };
 
   const updateStatus = (id, newStatus) => {
-    fetch(`http://localhost:5000/api/leads/${id}/status`, {
+    fetch(`${API_URL}/api/leads/${id}/status`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -56,7 +58,7 @@ function App() {
   };
 
   const deleteLead = (id) => {
-    fetch(`http://localhost:5000/api/leads/${id}`, {
+    fetch(`${API_URL}/api/leads/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
