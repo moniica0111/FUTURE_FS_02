@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Login from "./Login";
+import Login from "./login";
 
 const API_URL = "https://mini-crm-backend-e6y8.onrender.com";
 
