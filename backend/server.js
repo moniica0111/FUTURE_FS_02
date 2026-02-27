@@ -28,7 +28,12 @@ app.listen(PORT, () => {
 });
 
 // 🔥 THEN CONNECT TO MONGO
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected ✅"))
-  .catch((err) => console.error("MongoDB Error ❌", err));
+
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB Connected ✅");
+  })
+  .catch((err) => {
+    console.error("MongoDB Connection Error ❌", err);
+  });
