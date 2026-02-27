@@ -4,22 +4,36 @@ import Admin from "../models/Admin.js";
 
 const router = express.Router();
 
+/* REGISTER */
+router.post("/register", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-/* ============================
-   🔐 LOGIN ROUTE
-   ============================ */
+    const adminExists = await Admin.findOne({ email });
+    if (adminExists) {
+      return res.status(400).json({ message: "Admin already exists" });
+    }
+
+    const admin = new Admin({ email, password });
+    await admin.save();
+
+    res.status(201).json({ message: "Admin created successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+/* LOGIN */
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const admin = await Admin.findOne({ email });
-
     if (!admin) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const isMatch = await admin.matchPassword(password);
-
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -30,10 +44,7 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.json({
-      message: "Login successful",
-      token
-    });
+    res.json({ message: "Login successful", token });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
