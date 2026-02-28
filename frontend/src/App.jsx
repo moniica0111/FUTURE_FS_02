@@ -1,96 +1,96 @@
 import { useEffect, useState } from "react";
-import Login from "./login";
-
-const API_URL = "https://mini-crm-backend-e6y8.onrender.com";
 
 function App() {
   const [stats, setStats] = useState(null);
   const [leads, setLeads] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    !!localStorage.getItem("token")
-  );
+  const [newLead, setNewLead] = useState({
+    name: "",
+    email: "",
+    company: "",
+  });
+
+  const API = "https://mini-crm-backend-e6y8.onrender.com";
 
   useEffect(() => {
-    if (isLoggedIn) {
-      fetchStats();
-      fetchLeads();
-    }
-  }, [isLoggedIn]);
+    fetchStats();
+    fetchLeads();
+  }, []);
 
   const fetchStats = () => {
-    fetch(`${API_URL}/api/leads/stats/overview`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
+    fetch(`${API}/api/leads/stats/overview`)
       .then((res) => res.json())
       .then((data) => setStats(data))
       .catch((err) => console.error(err));
   };
 
   const fetchLeads = () => {
-    fetch(`${API_URL}/api/leads`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
+    fetch(`${API}/api/leads`)
       .then((res) => res.json())
       .then((data) => setLeads(data))
       .catch((err) => console.error(err));
   };
 
-  const updateStatus = (id, newStatus) => {
-    fetch(`${API_URL}/api/leads/${id}/status`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ status: newStatus }),
+  const addLead = () => {
+    fetch(`${API}/api/leads`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newLead),
     })
       .then((res) => res.json())
-      .then((updatedLead) => {
-        setLeads((prev) =>
-          prev.map((lead) => (lead._id === id ? updatedLead : lead))
-        );
+      .then(() => {
+        setNewLead({ name: "", email: "", company: "" });
+        fetchLeads();
         fetchStats();
       });
   };
 
   const deleteLead = (id) => {
-    fetch(`${API_URL}/api/leads/${id}`, {
+    fetch(`${API}/api/leads/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
     }).then(() => {
       fetchLeads();
       fetchStats();
     });
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-  };
-
-  if (!isLoggedIn) {
-    return <Login onLogin={() => setIsLoggedIn(true)} />;
-  }
-
   return (
     <div style={{ padding: "40px", maxWidth: "900px", margin: "auto" }}>
       <h1>Mini CRM Dashboard</h1>
-      <button onClick={logout}>Logout</button>
+
+      <hr />
+
+      <h2>Add Lead</h2>
+      <input
+        placeholder="Name"
+        value={newLead.name}
+        onChange={(e) =>
+          setNewLead({ ...newLead, name: e.target.value })
+        }
+      />
+      <input
+        placeholder="Email"
+        value={newLead.email}
+        onChange={(e) =>
+          setNewLead({ ...newLead, email: e.target.value })
+        }
+      />
+      <input
+        placeholder="Company"
+        value={newLead.company}
+        onChange={(e) =>
+          setNewLead({ ...newLead, company: e.target.value })
+        }
+      />
+      <button onClick={addLead}>Add</button>
 
       <hr />
 
       <h2>Overview</h2>
-      <div style={{ display: "flex", gap: "20px" }}>
-        <div>Total: {stats?.totalLeads || 0}</div>
-        <div>New: {stats?.newLeads || 0}</div>
-        <div>Contacted: {stats?.contactedLeads || 0}</div>
-        <div>Converted: {stats?.convertedLeads || 0}</div>
+      <div>
+        Total: {stats?.totalLeads || 0} | New:{" "}
+        {stats?.newLeads || 0} | Contacted:{" "}
+        {stats?.contactedLeads || 0} | Converted:{" "}
+        {stats?.convertedLeads || 0}
       </div>
 
       <hr />
@@ -101,31 +101,20 @@ function App() {
         <div
           key={lead._id}
           style={{
-            border: "1px solid #e0e0e0",
-            padding: "15px",
-            marginBottom: "15px",
-            borderRadius: "8px",
+            border: "1px solid #ccc",
+            padding: "10px",
+            marginBottom: "10px",
           }}
         >
-          <strong>{lead.name}</strong>
-
-          <select
-            value={lead.status}
-            onChange={(e) => updateStatus(lead._id, e.target.value)}
-            style={{ marginLeft: "10px" }}
-          >
-            <option value="New">New</option>
-            <option value="Contacted">Contacted</option>
-            <option value="Converted">Converted</option>
-          </select>
-
+          <strong>{lead.name}</strong> ({lead.status})
           <br />
-          Email: {lead.email}
+          {lead.email}
           <br />
-          Company: {lead.company}
-
+          {lead.company}
           <br />
-          <button onClick={() => deleteLead(lead._id)}>Delete</button>
+          <button onClick={() => deleteLead(lead._id)}>
+            Delete
+          </button>
         </div>
       ))}
     </div>
